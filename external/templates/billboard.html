@@ -1,3 +1,3 @@
 {%for line in result%}
-<pre id="{{line.0}}">{{line.1}}</pre>
+<pre>{{line.1 | safe}}</pre>
 {%endfor%}
