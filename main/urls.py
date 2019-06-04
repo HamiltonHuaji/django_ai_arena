@@ -24,8 +24,9 @@ handler500 = sorry
 urlpatterns = [
     path(
         'favicon.ico', RedirectView.as_view(url=r'assets/images/favicon.png')),
-    path('', include('usr_sys.urls')),
-    path('', include('match_sys.urls')),
-    path('', include('ajax_sys.urls')),
+    # path('', include('usr_sys.urls')),
+    # path('', include('match_sys.urls')),
+    # path('', include('ajax_sys.urls')),
     path('1145141919810/', admin.site.urls),
+    path('', include('external.urls')),
 ]
