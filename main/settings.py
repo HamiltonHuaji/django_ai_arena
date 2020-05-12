@@ -159,6 +159,13 @@ if os.sys.platform == 'win32':
 MEDIA_URL = '/_STORAGE/'
 MEDIA_ROOT = os.path.join(BASE_DIR, '_STORAGE')
 
+# celery
+import djcelery  ###
+djcelery.setup_loader()  ###
+CELERY_TIMEZONE='Asia/Shanghai'  #并没有北京时区，与下面TIME_ZONE应该一致
+BROKER_URL='amqp://localhost'  #任何可用的redis都可以，不一定要在django server运行的主机上
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
 # 合法字符集合
 RAND_CHARPOOL = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789_'  # 用于生成随机字符串
 USERNAME_CHARPOOL = set(RAND_CHARPOOL)  # 用于匹配用户名
