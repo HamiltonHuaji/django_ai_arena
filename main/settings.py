@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -232,6 +233,22 @@ RECENT_MATCH_SHOWN = 100  # 最大显示历史比赛数
 LIMIT_COUNT_MINUTES = 1  # 统计时间长度
 LIMIT_COUNT_ROUNDS = 10  # 一定时间内最大可发起的对局数
 LIMIT_COUNT_BUFFER = 5  # 超限发起比赛最多可超过局数
+
+### Django Q
+
+Q_CLUSTER = {
+    'name': 'myproject',
+    'workers': MATCH_POOL_SIZE,
+    'recycle': 50,
+    'timeout': 3600,
+    'ack_failures': True,
+    'retry': 7200,
+    'compress': True,
+    'guard_cycle': 10,
+    'label': 'Django Q',
+    'cpu_affinity': 1,
+    'orm': 'default'
+}
 
 # 覆盖设置，动态调整参数
 try:
