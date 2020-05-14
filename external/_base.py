@@ -6,6 +6,7 @@ from datetime import datetime
 from functools import lru_cache
 import ast, random, json
 from . import helpers_core
+from django_q.tasks import AsyncTask
 if __name__ != '__mp_main__':  # 由参赛子进程中隔离django库
     from django.conf import settings
 
@@ -28,23 +29,28 @@ class BaseProcess:
 
         # 获取match对象与代码路径
         self.match = models.PairMatch.objects.get(name=match_name)
-        code1 = str(self.match.code1.content)
-        code2 = str(self.match.code2.content)
 
         # 初始化进程
         self.params = params
         self.match_name = match_name
-        match_dir = path.join(settings.PAIRMATCH_DIR, match_name)
-        self.process = Process(
-            target=self.process_run,
-            args=([code1, code2], match_dir, params, self.output),
-            daemon=1)
 
     def start(self):
         '''启动进程'''
-        self.t_start = pf()
         self.timeout = self.get_timeout()
-        self.process.start()
+        match_dir = path.join(settings.PAIRMATCH_DIR, self.match_name)
+        code1 = str(self.match.code1.content)
+        code2 = str(self.match.code2.content)
+        self.process = AsyncTask(
+            self.process_run,
+            [code1, code2],
+            match_dir,
+            params,
+            self.output,
+            timeout=self.timeout,
+        )
+        self.process.run()
+        self.process.result(wait=0.1)
+        self.t_start = pf()
         try:
             self.match.status = 1
             self.match.run_datetime = datetime.now()
@@ -70,8 +76,7 @@ class BaseProcess:
         res = True
         if self.process.is_alive():
             self.flush_queue()
-            if now - self.t_start > self.timeout:  # 超时或外部中止自动杀进程
-                self.process.terminate()
+            if now - self.t_start > self.timeout:  # TODO: 外部中止进程
                 self.flush_queue()
                 res = self.summary(True)
         else:
